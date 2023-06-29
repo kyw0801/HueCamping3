@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="Notice">
+  
+  <!-- 공지사항 게시물 검색 전후 레코드 개수 -->
+  <select id="notice_cnt" parameterType="notice" 
+    resultType="int">
+     select count(board_no) from notice
+     <where>
+     <if test="find_field == ''">
+      <!-- 검색조건이 없어서 총레코드 개수 -->
+     </if>
+     <if test="find_field == 'board_title'">
+      <!-- 검색 조건이 제목인 경우 -->
+      board_title like #{find_name} <!-- like는 오라클 검색 연산자 -->
+     </if>
+     <if test="find_field == 'board_cont'">
+      board_cont like #{find_name}
+     </if>
+     </where>
+    </select>
+  
+  <!-- 공지사항 목록 -->
+    <select id="notice_list" resultType="notice" 
+    parameterType="notice">
+     <!-- resultType은 반환 타입,parameterType은 전달인자 타입
+     (생략가능) -->
+     select * from 
+     (select rowNum rNum,board_no,board_name,board_title,
+     board_hit,board_ref,board_step,board_level,board_date
+     from (select * from notice     
+     <where>
+     <if test="find_field == ''">
+      <!-- 검색조건이 없어서 총레코드 개수 -->
+     </if>
+     <if test="find_field == 'board_title'">
+      <!-- 검색 조건이 제목인 경우 -->
+      board_title like #{find_name} <!-- like는 오라클 검색 연산자 -->
+     </if>
+     <if test="find_field == 'board_cont'">
+      board_cont like #{find_name}
+     </if> <!-- 검색 조건이 내용인 경우 -->
+     <if test="find_field == 'board_name'">
+      board_name like #{find_name}
+     </if> <!-- 검색 조건이 작성자인 경우 -->
+     </where>     
+      order by board_no desc)) 
+     where rNum &gt;= #{startrow} and rNum &lt;= #{endrow}
+<!-- &gt;은 ~보다 크다(>), &lt;은 ~보다 작다(<) -->     
+    </select>
+  
+  <!-- 공지사항 게시물 내용보기 -->
+    <select id="notice_view" resultType="notice">
+     select * from notice where board_no=#{board_no}
+    </select>
+  
+  
+  <!-- 공지사항 게시물 글 저장 -->
+    <insert id="notice_write" parameterType="notice">
+     <!-- parameterType속성은 전달인자 타입.생략가능 -->
+     insert into notice (board_no,board_name,board_title,
+     board_pwd,board_cont,board_ref,board_step,
+     board_level,board_date) values(notice_no_seq.nextval,
+     #{board_name},#{board_title},#{board_pwd},#{board_cont},
+     notice_no_seq.nextval,0,0,sysdate)
+    </insert>
+    
+    
+   <!-- 공지사항 게시글 수정 -->
+    <update id="notice_edit" parameterType="notice">
+     update notice set board_name=#{board_name},
+     board_title=#{board_title},board_cont=#{board_cont}
+     where board_no=#{board_no}
+    </update> 
+    
+    
+    <!-- 공지사항 게시글 삭제 -->
+    <delete id="notice_del">
+     delete notice where board_no=#{board_no}
+    </delete> 
+    
+  </mapper>

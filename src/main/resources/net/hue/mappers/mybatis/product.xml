@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="Product">
+  <!-- 메인화면 상품목록 -->
+  <select id="all_product" parameterType="product" resultType="product">
+  select pro.NO, pro.LCNAME, scate.name as SCNAME, pro.NAME, pro.ORIPRICE, pro.DISCPRICE, pro.INFO, pro.MAINIMGN, pro.DETAILIMGN1, pro.DETAILIMGN2, pro.DETAILIMGN3, pro.DETAILIMGN4
+  from smallcategory scate inner join (select pro.NO, lcate.NAME as lcname, pro.SCNO, pro.NAME, pro.ORIPRICE, pro.DISCPRICE, pro.INFO, pro.MAINIMGN, pro.DETAILIMGN1, pro.DETAILIMGN2, pro.DETAILIMGN3, pro.DETAILIMGN4
+  from bigcategory lcate inner join product pro
+  on lcate.no = pro.lcno) pro
+  on scate.no = pro.scno order by pro.ORIPRICE desc
+  </select>
+  <!-- 메인화면 상품목록2 -->
+  <select id="all_product2" parameterType="product" resultType="product">
+  select pro.NO, pro.LCNAME, scate.name as SCNAME, pro.NAME, pro.ORIPRICE, pro.DISCPRICE, pro.INFO, pro.MAINIMGN, pro.DETAILIMGN1, pro.DETAILIMGN2, pro.DETAILIMGN3, pro.DETAILIMGN4
+  from smallcategory scate inner join (select pro.NO, lcate.NAME as lcname, pro.SCNO, pro.NAME, pro.ORIPRICE, pro.DISCPRICE, pro.INFO, pro.MAINIMGN, pro.DETAILIMGN1, pro.DETAILIMGN2, pro.DETAILIMGN3, pro.DETAILIMGN4
+  from bigcategory lcate inner join product pro
+  on lcate.no = pro.lcno) pro
+  on scate.no = pro.scno order by pro.NO desc
+  </select>
+  <!-- 메인화면 상품목록3 -->
+  <select id="all_product3" parameterType="product" resultType="product">
+  select pro.NO, pro.LCNAME, scate.name as SCNAME, pro.NAME, pro.ORIPRICE, pro.DISCPRICE, pro.INFO, pro.MAINIMGN, pro.DETAILIMGN1, pro.DETAILIMGN2, pro.DETAILIMGN3, pro.DETAILIMGN4
+  from smallcategory scate inner join (select pro.NO, lcate.NAME as lcname, pro.SCNO, pro.NAME, pro.ORIPRICE, pro.DISCPRICE, pro.INFO, pro.MAINIMGN, pro.DETAILIMGN1, pro.DETAILIMGN2, pro.DETAILIMGN3, pro.DETAILIMGN4
+  from bigcategory lcate inner join product pro
+  on lcate.no = pro.lcno) pro
+  on scate.no = pro.scno order by pro.NAME desc
+  </select>
+  
+  <!-- 관리자 상품목록 검색전후 레코드 개수 -->
+  <select id="product_count" resultType="int">
+   select count(no) from product
+    <where>
+     <if test="find_field == ''"></if><!-- 검색을 안한 경우라서 총레코드 개수를 반환 -->
+     <if test="find_field == 'name'"><!-- 상품명 기준으로 검색한 경우 -->
+      name like #{find_name}<!-- like는 ~와 비슷한 문자를 검색하는 검색연산자 -->
+     </if>
+    </where>
+  </select>
+  
+  <!-- 관리자 상품목록 겸색전후 목록 -->
+  <select id="product_list" parameterType="product" resultType="product">
+   select * from (select rowNum rNum, pro.NO, pro.LCNAME, scate.name as SCNAME, pro.NAME, pro.ORIPRICE, pro.DISCPRICE, pro.INFO, pro.MAINIMGN, pro.DETAILIMGN1, pro.DETAILIMGN2, pro.DETAILIMGN3, pro.DETAILIMGN4 
+   from smallcategory scate inner join (select rowNum rNum, pro.NO, lcate.NAME as lcname, pro.SCNO, pro.NAME, pro.ORIPRICE, pro.DISCPRICE, pro.INFO, pro.MAINIMGN, pro.DETAILIMGN1, pro.DETAILIMGN2, pro.DETAILIMGN3, pro.DETAILIMGN4 
+   from bigcategory lcate inner join product pro
+   on lcate.no = pro.lcno) pro
+   on scate.no = pro.scno 
+    <where>
+     <if test="find_field == ''"></if><!-- 검색어를 입력하지 않은 경우 =>전체목록 -->
+     <if test="find_field == 'name'"><!-- 제목기준으로 검색한 경우 -->
+      pro.name like #{find_name}<!-- like는 ~와 비슷한 문자를 검색하는 검색연산자  -->
+     </if>
+    </where>
+       order by pro.NO asc) where rNum &gt;= #{startrow} and rNum &lt;= #{endrow}
+  </select>
+  
+  <!-- 상품등록 -->
+  <insert id="insertProduct" parameterType="product">
+   insert into product 
+   values(prodseq.nextval,#{lcname},#{scname},#{name},#{oriprice},#{discprice},#{info},#{mainImgN},#{detailImgN1},#{detailImgN2},#{detailImgN3},#{detailImgN4})
+  </insert>
+  
+  <!-- 상품 삭제 -->
+  <delete id="prodDel">
+   delete from product where no=#{pno}
+  </delete>
+  
+  
+  <select id="LargeCount" resultType="int">
+  select count(no) from product where lcno=#{lcno}
+  </select>
+  
+  <select id="getLcList" resultType="product">
+   SELECT rowNum rNum, pro.NO, pro.LCNAME, scate.name AS SCNAME, pro.NAME, pro.ORIPRICE, pro.DISCPRICE, pro.INFO, pro.MAINIMGN, pro.DETAILIMGN1, pro.DETAILIMGN2, pro.DETAILIMGN3, pro.DETAILIMGN4
+   FROM smallcategory scate
+   INNER JOIN (
+    SELECT rowNum rNum, pro.NO, lcate.NAME AS lcname, pro.SCNO, pro.NAME, pro.ORIPRICE, pro.DISCPRICE, pro.INFO, pro.MAINIMGN, pro.DETAILIMGN1, pro.DETAILIMGN2, pro.DETAILIMGN3, pro.DETAILIMGN4
+    FROM bigcategory lcate
+    INNER JOIN product pro ON lcate.no = pro.lcno
+    WHERE lcate.no = #{lcno}
+   ) pro ON scate.no = pro.scno
+  <![CDATA[ AND rNum >= #{p.startrow} AND rNum <= #{p.endrow}]]> order by pro.NO desc
+  </select>
+  <select id="getLcList2" resultType="product">
+   SELECT rowNum rNum, pro.NO, pro.LCNAME, scate.name AS SCNAME, pro.NAME, pro.ORIPRICE, pro.DISCPRICE, pro.INFO, pro.MAINIMGN, pro.DETAILIMGN1, pro.DETAILIMGN2, pro.DETAILIMGN3, pro.DETAILIMGN4
+   FROM smallcategory scate
+   INNER JOIN (
+    SELECT rowNum rNum, pro.NO, lcate.NAME AS lcname, pro.SCNO, pro.NAME, pro.ORIPRICE, pro.DISCPRICE, pro.INFO, pro.MAINIMGN, pro.DETAILIMGN1, pro.DETAILIMGN2, pro.DETAILIMGN3, pro.DETAILIMGN4
+    FROM bigcategory lcate
+    INNER JOIN product pro ON lcate.no = pro.lcno
+    WHERE lcate.no = #{lcno}
+   ) pro ON scate.no = pro.scno
+  <![CDATA[ AND rNum >= #{p.startrow} AND rNum <= #{p.endrow}]]> order by pro.DISCPRICE desc
+  </select>
+  <select id="getLcList3" resultType="product">
+   SELECT rowNum rNum, pro.NO, pro.LCNAME, scate.name AS SCNAME, pro.NAME, pro.ORIPRICE, pro.DISCPRICE, pro.INFO, pro.MAINIMGN, pro.DETAILIMGN1, pro.DETAILIMGN2, pro.DETAILIMGN3, pro.DETAILIMGN4
+   FROM smallcategory scate
+   INNER JOIN (
+    SELECT rowNum rNum, pro.NO, lcate.NAME AS lcname, pro.SCNO, pro.NAME, pro.ORIPRICE, pro.DISCPRICE, pro.INFO, pro.MAINIMGN, pro.DETAILIMGN1, pro.DETAILIMGN2, pro.DETAILIMGN3, pro.DETAILIMGN4
+    FROM bigcategory lcate
+    INNER JOIN product pro ON lcate.no = pro.lcno
+    WHERE lcate.no = #{lcno}
+   ) pro ON scate.no = pro.scno 
+  <![CDATA[ AND rNum >= #{p.startrow} AND rNum <= #{p.endrow}]]> order by pro.DISCPRICE asc
+  </select>
+
+  <select id="SmallCount" resultType="int">
+	select count(no) from product where scno=#{scno} and lcno=#{lcno}
+  </select>
+
+  <select id="getScList" resultType="product">
+	select * from (select rowNum rNum, pro.NO, pro.LCNAME, scate.name as SCNAME, pro.NAME, pro.ORIPRICE, pro.DISCPRICE, pro.INFO, pro.MAINIMGN, pro.DETAILIMGN1, pro.DETAILIMGN2, pro.DETAILIMGN3, pro.DETAILIMGN4
+	from smallcategory scate inner join (select rowNum rNum, pro.NO, lcate.NAME as lcname, pro.SCNO, pro.NAME, pro.ORIPRICE, pro.DISCPRICE, pro.INFO, pro.MAINIMGN, pro.DETAILIMGN1, pro.DETAILIMGN2, pro.DETAILIMGN3, pro.DETAILIMGN4
+	from bigcategory lcate inner join product pro
+	on lcate.no = pro.lcno where lcate.no=#{lcno}) pro
+	on scate.no = pro.scno where scate.no=#{scno})
+	<![CDATA[ where rNum>=#{p.startrow} and rNum<=#{p.endrow}]]> order by no desc
+  </select>
+  <select id="getScList2" resultType="product">
+	select * from (select rowNum rNum, pro.NO, pro.LCNAME, scate.name as SCNAME, pro.NAME, pro.ORIPRICE, pro.DISCPRICE, pro.INFO, pro.MAINIMGN, pro.DETAILIMGN1, pro.DETAILIMGN2, pro.DETAILIMGN3, pro.DETAILIMGN4
+	from smallcategory scate inner join (select rowNum rNum, pro.NO, lcate.NAME as lcname, pro.SCNO, pro.NAME, pro.ORIPRICE, pro.DISCPRICE, pro.INFO, pro.MAINIMGN, pro.DETAILIMGN1, pro.DETAILIMGN2, pro.DETAILIMGN3, pro.DETAILIMGN4
+	from bigcategory lcate inner join product pro
+	on lcate.no = pro.lcno where lcate.no=#{lcno}) pro
+	on scate.no = pro.scno where scate.no=#{scno})
+	<![CDATA[ where rNum>=#{p.startrow} and rNum<=#{p.endrow}]]> order by DISCPRICE desc
+  </select>
+  <select id="getScList3" resultType="product">
+	select * from (select rowNum rNum, pro.NO, pro.LCNAME, scate.name as SCNAME, pro.NAME, pro.ORIPRICE, pro.DISCPRICE, pro.INFO, pro.MAINIMGN, pro.DETAILIMGN1, pro.DETAILIMGN2, pro.DETAILIMGN3, pro.DETAILIMGN4
+	from smallcategory scate inner join (select rowNum rNum, pro.NO, lcate.NAME as lcname, pro.SCNO, pro.NAME, pro.ORIPRICE, pro.DISCPRICE, pro.INFO, pro.MAINIMGN, pro.DETAILIMGN1, pro.DETAILIMGN2, pro.DETAILIMGN3, pro.DETAILIMGN4
+	from bigcategory lcate inner join product pro
+	on lcate.no = pro.lcno where lcate.no=#{lcno}) pro
+	on scate.no = pro.scno where scate.no=#{scno})
+	<![CDATA[ where rNum>=#{p.startrow} and rNum<=#{p.endrow}]]> order by DISCPRICE asc
+  </select>
+
+  <select id="getProduct" resultType="product">
+  SELECT pro.NO, pro.LCNAME, scate.name AS scname, pro.NAME, pro.ORIPRICE, pro.DISCPRICE, pro.INFO, pro.MAINIMGN as mainImgN, pro.DETAILIMGN1 as detailImgN1, pro.DETAILIMGN2, pro.DETAILIMGN3, pro.DETAILIMGN4
+  FROM smallcategory scate
+  INNER JOIN (SELECT pro.NO, lcate.NAME AS lcname, pro.SCNO, pro.NAME, pro.ORIPRICE, pro.DISCPRICE, pro.INFO, pro.MAINIMGN, pro.DETAILIMGN1, pro.DETAILIMGN2, pro.DETAILIMGN3, pro.DETAILIMGN4
+  FROM bigcategory lcate INNER JOIN product pro ON lcate.no = pro.lcno
+  WHERE pro.no = #{no}) pro ON scate.no = pro.scno
+  </select>
+  
+  <!-- 메인 페이지 상품 검색 전후 레코드 개수 -->
+ <select id="search_procnt" parameterType="product" resultType="int"> 
+  select count(no) from product
+  <where>
+  <if test="find_field == ''">
+  <!-- 검색조건이 없어서 총레코드 개수 -->
+  </if>
+  <if test="find_field == 'board_title'">
+  <!-- 검색 조건이 제목인 경우 -->
+  name like #{find_name}
+  </if>
+  </where>
+ </select>
+
+
+<!-- 상품 검색 목록 -->
+<select id="search_product" parameterType="product" resultType="product">
+  select * from (select rowNum rNum,pro.NO, pro.LCNAME, scate.name as SCNAME, pro.NAME, pro.ORIPRICE, pro.DISCPRICE, pro.INFO, pro.MAINIMGN, pro.DETAILIMGN1, pro.DETAILIMGN2, pro.DETAILIMGN3, pro.DETAILIMGN4
+from smallcategory scate inner join (select pro.NO, lcate.NAME as lcname, pro.SCNO, pro.NAME, pro.ORIPRICE, pro.DISCPRICE, pro.INFO, pro.MAINIMGN, pro.DETAILIMGN1, pro.DETAILIMGN2, pro.DETAILIMGN3, pro.DETAILIMGN4
+from bigcategory lcate inner join product pro
+on lcate.no = pro.lcno) pro
+on scate.no = pro.scno
+ <where>
+     <if test="find_field == ''">
+      <!-- 검색조건이 없어서 총레코드 개수 -->
+     </if>
+     <if test="find_field == 'board_title'">
+      <!-- 검색 조건이 제목인 경우 -->
+      pro.NAME like #{find_name} <!-- like는 오라클 검색 연산자 -->
+     </if>
+     </where>
+     order by pro.NO asc)
+     where rNum &gt;= #{startrow} and rNum &lt;= #{endrow}
+  </select>
+  
+  </mapper>

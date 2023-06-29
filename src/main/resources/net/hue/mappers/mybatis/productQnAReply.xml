@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="ProductQnAReply">
+    <!-- QnA 게시판 글 댓글 저장 -->
+    <insert id="proreply" parameterType="productQnAReply">
+     insert into ReplyproductQnA (reply_no,board_no,reply_name,reply_title,
+     reply_pwd,reply_cont,reply_date) values(ReplyproductQnA_no_seq.nextval,#{board_no},#{reply_name},
+     #{reply_title},#{reply_pwd},#{reply_cont},sysdate)
+    </insert>
+    
+    <!-- QnA 게시판 글 댓글 목록 보기 -->
+    <select id="proreplist" parameterType="productQnAReply" resultType="productQnAReply">
+     select reply_name,reply_cont,reply_date from ReplyproductQnA where board_no=#{board_no} order by reply_no asc  
+    </select>
+
+</mapper>

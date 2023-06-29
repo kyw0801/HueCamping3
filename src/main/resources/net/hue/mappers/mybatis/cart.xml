@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+   
+  <mapper namespace="Cart">
+  
+  <select id="count_cart" resultType="int">
+  select count(*) from cart where mno=#{memno}
+  </select>
+  
+  <select id="All_Cart" resultType="cart">
+	select ct.no, pro.name as pname, ct.opname, pro.discprice as oneprice,
+	ct.qty, pro.mainimgn from product pro inner join cart ct
+	on pro.no = ct.pno where mno=#{mno}
+  </select>
+  
+  <delete id="delete_cart">
+  delete from cart where no=#{no}
+  </delete>
+  
+  <insert id="insert_cart">
+  insert into cart values(cartseq.nextval,#{mno},#{pno},#{opname},#{qty})
+  </insert>
+  
+  <update id="update_cart">
+  	update cart set qty =#{qty} where no=#{no}
+  </update>
+  
+  <select id="getItem" resultType="cart">
+   select ct.no, pno, pro.name as pname, ct.opname, pro.discprice as oneprice,
+   ct.qty, pro.mainimgn from product pro inner join cart ct
+   on pro.no = ct.pno where ct.no=#{ctno}
+  </select>
+ 
+ <!-- 장바구니 체크 결제 -->
+ <select id="selectItem" resultType="cart">
+   select ct.no, pno, pro.name as pname, ct.opname, pro.discprice as oneprice,
+   ct.qty, pro.mainimgn from product pro inner join cart ct
+   on pro.no = ct.pno where ct.no=#{ctno}
+  </select>
+  
+  <!-- 스킵 -->
+  <select id="getMaxCtno" resultType="int">
+   select max(no) from cart where mno=#{mno}
+  </select>
+  
+  </mapper>

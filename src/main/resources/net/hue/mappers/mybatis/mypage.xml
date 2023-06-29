@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="Mypage">
+  
+  <!-- 회원 탈퇴 -->
+  <select id="mem_del" resultType="member">
+  select * from member where id=#{id}
+  </select>
+  
+  <!-- 회원 탈퇴 -->
+  <update id="mem_del_ok">
+    update member set state =2, deldate =sysdate where id =#{id} and password =#{password} and email =#{email}
+</update>
+  
+  <!-- 회원정보 수정 -->
+  <select id="mem_edit" resultType="member">
+  select * from member where no=#{no}
+  </select>
+  
+  <!-- 회원정보 수정ok -->
+  <update id="mem_edit_ok" parameterType="member">
+     update member set id=#{id},name=#{name},zip=#{zip},addr1=#{addr1},addr2=#{addr2}
+	,mobile1=#{mobile1},mobile2=#{mobile2},mobile3=#{mobile3},email=#{email},gender=#{gender}
+	where no=#{no} and password=#{password}
+   </update>
+  
+  <!-- 주문내역  -->
+    <select id="order_list" resultType="order">
+  	select o.no, o.id, p.name, o.pno, p.mainimgn, o.opname, o.qty, o.price, to_char(o.time, 'YYYY-MM-DD HH24:MI:SS') as time, o.receiver, o.rv_hp1, o.rv_hp2, o.rv_hp3, o.rv_zip, o.rv_addr1, o.rv_addr2 
+	from product p inner join (select o.no, m.id, o.pno, o.opname, o.qty, o.price, o.time, o.receiver, o.rv_hp1, o.rv_hp2, o.rv_hp3, o.rv_zip, o.rv_addr1, o.rv_addr2 
+	from member m inner join orderlist o
+	on m.no = o.mno) o
+	on p.no = o.pno where id=#{id}  order by o.no desc
+	</select>
+	
+	<!-- 주문내역 삭제 -->
+	<delete id="orderlist_del">
+	 delete from orderlist where no=#{no}
+	</delete>
+	
+	<!-- 관심상품 목록 -->
+	<select id="wish_list" resultType="wishlist">
+	 select w.no, pro.name as pname, w.pno as pno, pro.discprice as oneprice,
+	w.qty, pro.mainimgn from product pro inner join wishlist w
+	on pro.no = w.pno where mno=#{mno} order by w.no desc
+	</select>
+	
+	
+	<!-- 관심상품 추가 -->
+	<insert id="wishlist_insert">
+	insert into wishlist values(wishlist_no_seq.nextval,#{mno},#{pno},#{opname},#{qty})
+	</insert>
+	
+	<!-- 관심상품 삭제 -->
+	<delete id="wishlist_del">
+	delete from wishlist where no=#{itemno}
+	</delete>
+  </mapper>

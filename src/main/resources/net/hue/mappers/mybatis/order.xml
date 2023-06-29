@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="Order">
+  <!-- 모든 주문 -->
+  <select id="all_order" parameterType="order" resultType="order">
+  select o.no, o.id, o.pno, p.name, p.mainimgn, o.opname, o.qty, o.price, to_char(o.time, 'YYYY-MM-DD HH24:MI:SS') as time, o.receiver, o.rv_hp1, o.rv_hp2, o.rv_hp3, o.rv_zip, o.rv_addr1, o.rv_addr2 
+from product p inner join (select o.no, m.id, o.pno, o.opname, o.qty, o.price, o.time, o.receiver, o.rv_hp1, o.rv_hp2, o.rv_hp3, o.rv_zip, o.rv_addr1, o.rv_addr2 
+from member m inner join orderlist o
+on m.no = o.mno) o
+on p.no = o.pno order by o.no desc
+  </select>
+  
+  <!-- 관리자 주문목록 검색전후 레코드 개수 -->
+  <select id="order_count" resultType="int">
+   select count(o.no) from orderlist o, product p where o.pno=p.no
+    <where>
+     <if test="find_field == ''"></if><!-- 검색을 안한 경우라서 총레코드 개수를 반환 -->
+     <if test="find_field == 'name'"><!-- 상품명 기준으로 검색한 경우 -->
+      name like #{find_name}<!-- like는 ~와 비슷한 문자를 검색하는 검색연산자 -->
+     </if>
+    </where>
+  </select>
+  
+  <!-- 관리자 주문목록 겸색전후 목록 -->
+  <select id="Aorder_list" parameterType="order" resultType="order">
+   select * from (select rowNum rNum, o.no, o.id, o.pno, p.name, p.mainimgn, o.opname, o.qty, o.price, to_char(o.time, 'YYYY-MM-DD HH24:MI:SS') as time, o.receiver, o.rv_hp1, o.rv_hp2, o.rv_hp3, o.rv_zip, o.rv_addr1, o.rv_addr2 
+   from product p inner join (select rowNum rNum, o.no, m.id, o.pno, o.opname, o.qty, o.price, o.time, o.receiver, o.rv_hp1, o.rv_hp2, o.rv_hp3, o.rv_zip, o.rv_addr1, o.rv_addr2 
+   from member m inner join orderlist o
+   on m.no = o.mno) o
+   on p.no = o.pno
+    <where>
+     <if test="find_field == ''"></if><!-- 검색어를 입력하지 않은 경우 =>전체목록 -->
+     <if test="find_field == 'name'"><!-- 제목기준으로 검색한 경우 -->
+      name like #{find_name}<!-- like는 ~와 비슷한 문자를 검색하는 검색연산자  -->
+     </if>
+    </where>
+    ) where rNum &gt;= #{startrow} and rNum &lt;= #{endrow} order by no desc
+  </select>
+  
+  <!-- 주문 삭제 -->	
+  <delete id="deleteorder">
+   delete from orderlist where pno= ${pno}
+  </delete>
+  
+  <!-- 주문 OK -->
+  <insert id="insertOrder">
+   insert into orderlist 
+   values(orderseq.nextval,#{mbean.no},#{ctbean.pno},#{ctbean.opname},#{ctbean.qty},
+   #{ctbean.oneprice},sysdate,#{mbean.name},#{mbean.mobile1},#{mbean.mobile2},#{mbean.mobile3},
+   #{mbean.zip},#{mbean.addr1},#{mbean.addr2})
+  </insert>
+
+  </mapper>

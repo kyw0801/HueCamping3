@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="Stock">
+  
+  <select id="Stock_Pno" resultType="stock">
+  select * from stock where pno=#{pno} order by no
+  </select>
+    
+  <insert id="insertStock">
+   insert into stock 
+   values(stockseq.nextval,(select last_number-1 from user_sequences where sequence_name = 'PRODSEQ'),#{opname},#{count})
+  </insert>
+  
+  <delete id="deleteAllStock">
+   delete from stock where pno=#{pno}
+  </delete>
+  
+  <!-- 주문 OK -->
+  <update id="updateByOrder">
+   update stock set count=count-#{qty} where pno=#{pno} and opname=#{opname}
+  </update>
+  
+  </mapper>

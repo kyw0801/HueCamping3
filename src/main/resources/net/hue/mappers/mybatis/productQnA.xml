@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="ProductQnA">
+  
+  <!-- QnA 게시물 검색 전후 레코드 개수 -->
+  <select id="prolist_cnt" parameterType="productQnA" 
+    resultType="int">
+     select count(board_no) from productQnA
+     <where>
+     <if test="find_field == ''">
+      <!-- 검색조건이 없어서 총레코드 개수 -->
+     </if>
+     <if test="find_field == 'board_title'">
+      <!-- 검색 조건이 제목인 경우 -->
+      board_title like #{find_name} <!-- like는 오라클 검색
+      연산자 -->
+     </if>
+     <if test="find_field == 'board_cont'">
+      board_cont like #{find_name}
+     </if>
+     </where>
+    </select>
+    
+  <!-- QnA 게시판 목록 -->
+    <select id="prolist" resultType="productQnA" 
+    parameterType="productQnA">
+     <!-- resultType은 반환 타입,parameterType은 전달인자 타입
+     (생략가능) -->
+     select * from 
+     (select rowNum rNum,board_no,board_name,board_title,
+     board_hit,board_ref,board_step,board_level,board_date
+     from (select * from productQnA     
+     <where>
+     <if test="find_field == ''">
+      <!-- 검색조건이 없어서 총레코드 개수 -->
+     </if>
+     <if test="find_field == 'board_title'">
+      <!-- 검색 조건이 제목인 경우 -->
+      board_title like #{find_name} <!-- like는 오라클 검색 연산자 -->
+     </if>
+     <if test="find_field == 'board_cont'">
+      board_cont like #{find_name}
+     </if> <!-- 검색 조건이 내용인 경우 -->
+     <if test="find_field == 'board_name'">
+      board_name like #{find_name}
+     </if> <!-- 검색 조건이 작성자인 경우 -->
+     </where>     
+      order by board_no desc)) 
+     where rNum &gt;= #{startrow} and rNum &lt;= #{endrow}
+<!-- &gt;은 ~보다 크다(>), &lt;은 ~보다 작다(<) -->     
+    </select>  
+    
+    <!-- QnA 게시물 내용보기 -->
+    <select id="proview" resultType="productQnA">
+     select * from productQnA where board_no=#{board_no}
+    </select>
+    
+    <!-- QnA 게시물 글 저장 -->
+    <insert id="prowrite" parameterType="productQnA">
+     <!-- parameterType속성은 전달인자 타입.생략가능 -->
+     insert into productQnA (board_no,board_name,board_title,
+     board_pwd,board_cont,board_ref,board_step,
+     board_level,board_date) values(productQnA_no_seq.nextval,
+     #{board_name},#{board_title},#{board_pwd},#{board_cont},
+     productQnA_no_seq.nextval,0,0,sysdate)
+    </insert>
+    
+    
+    <!-- 게시판 글 수정 -->
+    <update id="proedit" parameterType="productQnA">
+     update productQnA set board_name=#{board_name},
+     board_title=#{board_title},board_cont=#{board_cont}
+     where board_no=#{board_no}
+    </update>
+    
+    
+    <!-- 게시판 글 삭제 -->
+    <delete id="prodel">
+     delete productQnA where board_no=#{board_no}
+    </delete>
+    
+    
+    
+  </mapper>

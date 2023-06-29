@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="Review">
+  
+  <!-- 포토후기 게시물 검색 전후 레코드 개수 -->
+  <select id="revlist_cnt" parameterType="review" 
+    resultType="int">
+     select count(board_no) from review
+     <where>
+     <if test="find_field == ''">
+      <!-- 검색조건이 없어서 총레코드 개수 -->
+     </if>
+     <if test="find_field == 'board_title'">
+      <!-- 검색 조건이 제목인 경우 -->
+      board_title like #{find_name} <!-- like는 오라클 검색
+      연산자 -->
+     </if>
+     <if test="find_field == 'board_cont'">
+      board_cont like #{find_name}
+     </if>
+     </where>
+    </select>
+    
+    <!-- 포토후기 게시판 목록 -->
+    <select id="revlist" resultType="review" 
+    parameterType="review">
+     <!-- resultType은 반환 타입,parameterType은 전달인자 타입
+     (생략가능) -->
+     select * from 
+     (select rowNum rNum,board_no,board_name,board_title,
+     board_hit,board_date,board_file1
+     from (select * from review     
+     <where>
+     <if test="find_field == ''">
+      <!-- 검색조건이 없어서 총레코드 개수 -->
+     </if>
+     <if test="find_field == 'board_title'">
+      <!-- 검색 조건이 제목인 경우 -->
+      board_title like #{find_name} <!-- like는 오라클 검색 연산자 -->
+     </if>
+     <if test="find_field == 'board_cont'">
+      board_cont like #{find_name}
+     </if> <!-- 검색 조건이 내용인 경우 -->
+     <if test="find_field == 'board_name'">
+      board_name like #{find_name}
+     </if> <!-- 검색 조건이 작성자인 경우 -->
+     </where>     
+      order by board_no desc)) 
+     where rNum &gt;= #{startrow} and rNum &lt;= #{endrow}
+<!-- &gt;은 ~보다 크다(>), &lt;은 ~보다 작다(<) -->     
+    </select>
+    
+    
+    <!-- 포토후기 게시판 글 내용 보기 -->
+    <select id="revview" resultType="review">
+     select * from review where board_no=#{board_no}
+    </select>
+    
+    
+    <!-- 포토후기 조회수 증가 -->
+    <update id="revhit" parameterType="int">
+     update review set board_hit=board_hit+1 
+     where board_no=#{board_no}
+    </update>
+    
+    <!-- 포토후기 게시물 글 저장 -->
+    <insert id="revwrite">
+       insert into review (board_no,board_name,board_title,board_pwd,board_cont,board_file1,board_ref,board_step,
+       board_level,board_date) values(review_no_seq.nextval, #{board_name}, #{board_title}, #{board_pwd},
+       #{board_cont}, #{board_file1}, review_no_seq.nextval, 0,0,sysdate)
+    </insert>
+    
+    
+    <!-- 포토후기 게시판 글 수정 -->
+    <update id="review_edit">
+     update review set board_name=#{board_name},
+     board_title=#{board_title},board_cont=#{board_cont}
+     where board_no=#{board_no}
+    </update>
+    
+    
+    <!-- 포토후기 게시판 글 삭제 -->
+    <delete id="revdel">
+      delete review where board_no=#{board_no}   <!-- from 절문 생략가능하다. BbsDAOImpl의 bbs_no와 bbs.xml의 
+      no이름이 달라도 된다. -->
+    </delete>
+  </mapper>
